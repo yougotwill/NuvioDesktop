@@ -182,6 +182,7 @@ let state = {
   resizeModeLabel: "Fit",
   playbackSpeedLabel: "1x",
   isFullscreen: false,
+  escapeExitsPresentation: false,
   volumeLevel: null,
   subtitlesLabel: "Subs",
   audioLabel: "Audio",
@@ -3341,6 +3342,8 @@ document.addEventListener("keydown", event => {
       send("pictureInPicture", 0);
     } else if (state.isFullscreen) {
       togglePlayerFullscreen();
+    } else if (state.escapeExitsPresentation) {
+      send("exitPresentation", 0);
     } else {
       send("back", 0);
     }

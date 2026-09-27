@@ -25,6 +25,7 @@ import com.nuvio.app.core.ui.NuvioLoadingIndicator
 import com.nuvio.app.features.player.EnterImmersivePlayerMode
 import com.nuvio.app.features.player.PlatformPlayerSurface
 import com.nuvio.app.features.player.PlayerControlsAction
+import com.nuvio.app.features.player.PlayerControlsState
 import com.nuvio.app.features.player.PlayerEngineController
 import com.nuvio.app.features.player.PlayerPlaybackSnapshot
 import com.nuvio.app.features.player.PlayerResizeMode
@@ -43,6 +44,7 @@ internal fun TrailerPlayer(
     modifier: Modifier = Modifier,
     title: String = "",
     onExitFullscreen: (() -> Unit)? = null,
+    onDismiss: () -> Unit = {},
 ) {
     val error = errorMessage ?: state.error
     EnterImmersivePlayerMode(keepScreenAwake = error == null && state.playWhenReady && !state.snapshot.isEnded)
@@ -53,6 +55,7 @@ internal fun TrailerPlayer(
                 state = state,
                 resizeMode = PlayerResizeMode.Fit,
                 onExitFullscreen = onExitFullscreen,
+                onDismiss = onDismiss,
             )
         }
         when {
@@ -96,6 +99,7 @@ private fun TrailerPlaybackSurface(
     state: TrailerPlaybackState,
     resizeMode: PlayerResizeMode,
     onExitFullscreen: (() -> Unit)?,
+    onDismiss: () -> Unit,
 ) {
     val presentationId = remember { state.presentationId }
     val resumePositionMs = remember { state.snapshot.positionMs }
@@ -126,12 +130,25 @@ private fun TrailerPlaybackSurface(
             presentationId == state.presentationId,
         resizeMode = resizeMode,
         useNativeController = false,
+        playerControlsState = PlayerControlsState(
+            escapeExitsPresentation = onExitFullscreen != null,
+        ),
         onPlayerControlsAction = { action ->
-            if (action == PlayerControlsAction.Back && onExitFullscreen != null) {
-                onExitFullscreen()
-                true
-            } else {
-                false
+            when (action) {
+                PlayerControlsAction.Back -> {
+                    onDismiss()
+                    true
+                }
+                PlayerControlsAction.ExitPresentation -> {
+                    val exitFullscreen = onExitFullscreen
+                    if (exitFullscreen != null) {
+                        exitFullscreen()
+                        true
+                    } else {
+                        false
+                    }
+                }
+                else -> false
             }
         },
         onControllerReady = {

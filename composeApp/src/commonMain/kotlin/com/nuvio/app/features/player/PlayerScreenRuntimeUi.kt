@@ -789,6 +789,7 @@ private fun PlayerScreenRuntime.handlePlayerControlsAction(action: PlayerControl
         }
         PlayerControlsAction.RevealLockedOverlay -> revealLockedOverlay()
         PlayerControlsAction.Back -> requestBack()
+        PlayerControlsAction.ExitPresentation -> return false
         PlayerControlsAction.TogglePlayback -> {
             prepareTogglePlaybackForNativeFallback()
             return false

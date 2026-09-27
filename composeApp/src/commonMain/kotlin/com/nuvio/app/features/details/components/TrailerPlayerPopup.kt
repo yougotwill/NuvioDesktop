@@ -85,6 +85,16 @@ fun TrailerPlayerPopup(
             toggleFullscreen()
         }
     }
+    val dismissTrailer: () -> Unit = {
+        playbackState.controller?.pause()
+        if (isIos || fullscreen) {
+            onDismiss()
+        } else {
+            coroutineScope.launch {
+                dismissNuvioBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
+            }
+        }
+    }
 
     if (isIos || fullscreen) {
         LockPlayerToLandscape()
@@ -98,20 +108,14 @@ fun TrailerPlayerPopup(
                 modifier = Modifier.fillMaxSize(),
                 title = headerSubtitle.ifBlank { headerType },
                 onExitFullscreen = exitFullscreen,
+                onDismiss = dismissTrailer,
             )
         }
         return
     }
 
-    val dismissSheet: () -> Unit = {
-        playbackState.controller?.pause()
-        coroutineScope.launch {
-            dismissNuvioBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
-        }
-    }
-
     NuvioModalBottomSheet(
-        onDismissRequest = dismissSheet,
+        onDismissRequest = dismissTrailer,
         sheetState = sheetState,
     ) {
         Column(
@@ -154,7 +158,7 @@ fun TrailerPlayerPopup(
                         tint = MaterialTheme.colorScheme.onSurface,
                     )
                 }
-                IconButton(onClick = dismissSheet) {
+                IconButton(onClick = dismissTrailer) {
                     Icon(
                         imageVector = Icons.Rounded.Close,
                         contentDescription = stringResource(Res.string.trailer_close),
@@ -175,6 +179,7 @@ fun TrailerPlayerPopup(
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(18.dp))
                     .aspectRatio(16f / 9f),
+                onDismiss = dismissTrailer,
             )
         }
     }

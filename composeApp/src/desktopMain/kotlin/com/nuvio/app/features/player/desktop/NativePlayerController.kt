@@ -1188,6 +1188,7 @@ private fun String.toPlayerControlsAction(): PlayerControlsAction? =
     when (this) {
         "toggleChrome" -> PlayerControlsAction.ToggleChrome
         "back" -> PlayerControlsAction.Back
+        "exitPresentation" -> PlayerControlsAction.ExitPresentation
         "toggle" -> PlayerControlsAction.TogglePlayback
         "keyboardToggle" -> PlayerControlsAction.KeyboardTogglePlayback
         "seekBack" -> PlayerControlsAction.SeekBack
@@ -1261,6 +1262,8 @@ private fun PlayerControlsState.toControlsJson(isFullscreen: Boolean): String =
         appendJsonField("pauseLabel", pauseLabel)
         append(',')
         appendJsonField("closeLabel", closeLabel)
+        append(',')
+        appendJsonField("escapeExitsPresentation", escapeExitsPresentation)
         append(',')
         appendJsonField("mutedLabel", mutedLabel)
         append(',')
