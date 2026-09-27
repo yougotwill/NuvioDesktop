@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.nuvio.app.core.ui.NuvioLoadingIndicator
 import com.nuvio.app.features.player.EnterImmersivePlayerMode
 import com.nuvio.app.features.player.PlatformPlayerSurface
+import com.nuvio.app.features.player.PlayerControlsAction
 import com.nuvio.app.features.player.PlayerEngineController
 import com.nuvio.app.features.player.PlayerPlaybackSnapshot
 import com.nuvio.app.features.player.PlayerResizeMode
@@ -51,6 +52,7 @@ internal fun TrailerPlayer(
                 source = source,
                 state = state,
                 resizeMode = PlayerResizeMode.Fit,
+                onExitFullscreen = onExitFullscreen,
             )
         }
         when {
@@ -93,6 +95,7 @@ private fun TrailerPlaybackSurface(
     source: TrailerPlaybackSource,
     state: TrailerPlaybackState,
     resizeMode: PlayerResizeMode,
+    onExitFullscreen: (() -> Unit)?,
 ) {
     val presentationId = remember { state.presentationId }
     val resumePositionMs = remember { state.snapshot.positionMs }
@@ -123,6 +126,14 @@ private fun TrailerPlaybackSurface(
             presentationId == state.presentationId,
         resizeMode = resizeMode,
         useNativeController = false,
+        onPlayerControlsAction = { action ->
+            if (action == PlayerControlsAction.Back && onExitFullscreen != null) {
+                onExitFullscreen()
+                true
+            } else {
+                false
+            }
+        },
         onControllerReady = {
             controller = it
             if (presentationId == state.presentationId) state.controller = it
