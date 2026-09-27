@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.nuvio.app.core.ui.NuvioLoadingIndicator
 import com.nuvio.app.features.player.EnterImmersivePlayerMode
 import com.nuvio.app.features.player.PlatformPlayerSurface
+import com.nuvio.app.features.player.PlayerControlsState
 import com.nuvio.app.features.player.PlayerEngineController
 import com.nuvio.app.features.player.PlayerPlaybackSnapshot
 import com.nuvio.app.features.player.PlayerResizeMode
@@ -99,6 +100,7 @@ private fun TrailerPlaybackSurface(
     var restoringPosition by remember { mutableStateOf(resumePositionMs > 0L) }
     var controller by remember { mutableStateOf<PlayerEngineController?>(null) }
     var snapshot by remember { mutableStateOf(PlayerPlaybackSnapshot()) }
+    var controlsVisible by remember { mutableStateOf(true) }
 
     LaunchedEffect(controller, snapshot.isLoading, snapshot.durationMs, restoringPosition) {
         val player = controller
@@ -123,6 +125,24 @@ private fun TrailerPlaybackSurface(
             presentationId == state.presentationId,
         resizeMode = resizeMode,
         useNativeController = false,
+        playerControlsState = PlayerControlsState(controlsVisible = controlsVisible),
+        onPlayerControlsEvent = { type, _ ->
+            when (type) {
+                "cursorActivity" -> {
+                    controlsVisible = true
+                    true
+                }
+                "hideChrome" -> {
+                    controlsVisible = false
+                    true
+                }
+                "keepChromeVisible" -> {
+                    controlsVisible = true
+                    true
+                }
+                else -> false
+            }
+        },
         onControllerReady = {
             controller = it
             if (presentationId == state.presentationId) state.controller = it
